@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
         m.nombre,
         m.precio_por_metro,
         mp.cantidad,
-        mp.talla
+        mp.grupo_tallas
       FROM materiales_por_prenda mp
       JOIN materiales m ON mp.material_id = m.id
       WHERE mp.prenda_id = $1

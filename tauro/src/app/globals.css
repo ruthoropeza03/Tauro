@@ -4,22 +4,125 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff4e3;
+  --foreground: #0e1625;
+  --primary: 140 24 18;    /* #8c1812 */
+  --secondary: 14 22 37;   /* #0e1625 */
+  --accent: 255 244 227;   /* #fff4e3 */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0e1625;
+    --foreground: #fff4e3;
   }
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: var(--secondary);
   font-family: 'Inter', Arial, Helvetica, sans-serif;
-  color: #171717;
+}
+
+@layer base {
+  :root {
+    --color-primary: var(--primary);
+    --color-secondary: var(--secondary);
+    --color-accent: var(--accent);
+  }
+}
+
+/* Estilos para tablas - Sin usar @apply */
+.table-custom {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 0.5rem;
+  overflow: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.table-custom thead {
+  background-color: rgb(var(--primary));
+  color: rgb(var(--accent));
+  position: sticky;
+  top: 0;
+}
+
+.table-custom th {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.05em;
+  
+}
+
+.table-custom tbody {
+  background-color: white;
+}
+
+.table-custom tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-custom td {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: rgb(var(--secondary));
+  text-align: center;
+}
+
+.table-custom tbody tr:nth-child(even) {
+  background-color: rgba(var(--accent), 0.3);
+}
+
+.table-custom tbody tr:hover {
+  background-color: rgba(var(--primary), 0.1);
+  transition: background-color 200ms;
+}
+
+.table-custom tfoot {
+  background-color: rgb(var(--secondary));
+  color: rgb(var(--accent));
+}
+
+.table-custom tfoot td {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Variante para tablas en modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .table-custom tbody {
+    background-color: rgba(var(--secondary), 0.8);
+  }
+
+  .table-custom tbody tr {
+    border-bottom: 1px solid #4b5563;
+  }
+
+  .table-custom td {
+    color: rgb(var(--secondary));
+  }
+
+  .table-custom tbody tr:nth-child(even) {
+    background-color: rgba(var(--secondary), 0.6);
+  }
+
+  .table-custom tbody tr:hover {
+    background-color: rgba(var(--primary), 0.2);
+  }
 }

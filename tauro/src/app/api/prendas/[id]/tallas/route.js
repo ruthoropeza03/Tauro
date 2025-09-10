@@ -7,7 +7,7 @@ export async function GET(request, { params }) {
     const { id } = await params
     
     const result = await query(
-      'SELECT DISTINCT talla FROM materiales_por_prenda WHERE prenda_id = $1 ORDER BY talla',
+      'SELECT DISTINCT grupo_tallas FROM materiales_por_prenda WHERE prenda_id = $1 ORDER BY grupo_tallas',
       [id]
     )
     

@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { nombre, descripcion, precio_fabricacion, precio_venta, imagen_url } = await request.json()
+    const { nombre, descripcion, precio_fabricacion, precio_venta, imagen_url, grupo_tallas } = await request.json()
     
     // Convertir URL de Google Drive al formato de thumbnail si es necesario
     let imagenUrlFormateada = null;
@@ -34,8 +34,8 @@ export async function POST(request) {
     // Asegurarse de que el precio de fabricación sea un número
     const precioFabricacion = precio_fabricacion ? parseFloat(precio_fabricacion) : 0
     const result = await query(
-      'INSERT INTO prendas (nombre, descripcion, precio_fabricacion, precio_venta, imagen_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [nombre, descripcion, precioFabricacion, precio_venta ? parseFloat(precio_venta) : null, imagenUrlFormateada]
+      'INSERT INTO prendas (nombre, descripcion, precio_fabricacion, precio_venta, imagen_url, grupo_tallas) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [nombre, descripcion, precioFabricacion, precio_venta ? parseFloat(precio_venta) : null, imagenUrlFormateada, grupo_tallas]
     )
     return Response.json({ 
       success: true, 
@@ -52,17 +52,39 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
-    const { id, nombre, descripcion, precio_fabricacion, precio_venta, imagen_url } = await request.json()
+    const { id, nombre, descripcion, precio_fabricacion, precio_venta, imagen_url, grupo_tallas } = await request.json()
     
-    // Convertir URL de Google Drive al formato de thumbnail si es necesario
-    let imagenUrlFormateada = null;
-    if (imagen_url) {
+    // Obtener la prenda actual primero
+    const prendaActual = await query('SELECT imagen_url FROM prendas WHERE id = $1', [id])
+    const imagenUrlActual = prendaActual.rows[0]?.imagen_url
+    
+    let imagenUrlFormateada = imagenUrlActual; // Mantener la URL actual por defecto
+    
+    // Solo formatear y actualizar la URL si se proporciona una nueva
+    if (imagen_url && imagen_url.trim() !== '') {
       imagenUrlFormateada = formatGoogleDriveUrl(imagen_url);
     }
     
     const result = await query(
-      'UPDATE prendas SET nombre = $1, descripcion = $2, precio_fabricacion = $3, precio_venta = $4, imagen_url = $5, updated_at = NOW() WHERE id = $6 RETURNING *',
-      [nombre, descripcion, precio_fabricacion ? parseFloat(precio_fabricacion) : null, precio_venta ? parseFloat(precio_venta) : null, imagenUrlFormateada, id]
+      `UPDATE prendas 
+       SET nombre = $1, 
+           descripcion = $2, 
+           precio_fabricacion = $3, 
+           precio_venta = $4, 
+           imagen_url = $5, 
+           grupo_tallas = $6, 
+           updated_at = NOW() 
+       WHERE id = $7 
+       RETURNING *`,
+      [
+        nombre, 
+        descripcion, 
+        precio_fabricacion ? parseFloat(precio_fabricacion) : null, 
+        precio_venta ? parseFloat(precio_venta) : null, 
+        imagenUrlFormateada, 
+        grupo_tallas, 
+        id
+      ]
     )
     return Response.json({ 
       success: true, 
