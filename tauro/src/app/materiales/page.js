@@ -150,8 +150,8 @@ export default function Materiales() {
           </form>
         )}
         
-        <div class="overflow-auto" className="bg-white rounded shadow-md overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded shadow-md overflow-hidden">
+          <table className="overflow-x-auto w-full">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-3 text-black text-left">Nombre</th>
