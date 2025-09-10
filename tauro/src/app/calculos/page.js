@@ -188,8 +188,6 @@ export default function Calculos() {
         }`}>
           Ganancia: ${resultados.ganancia_estimada.toFixed(2)}
         </p>
-        <p><span className="font-medium">Margen:</span> {resultados.margen_ganancia.toFixed(1)}%</p>
-        <p><span className="font-medium">Markup:</span> {resultados.markup.toFixed(1)}%</p>
       </div>
     </div>
 

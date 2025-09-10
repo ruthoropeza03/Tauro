@@ -45,8 +45,6 @@ export async function POST(request) {
     
     // Calcular márgenes y porcentajes
     const costoTotal = costoTotalMateriales + (costoTotalFabricacion * 0)
-    const margenGanancia = precioTotalVenta > 0 ? ((precioTotalVenta - costoTotal) / precioTotalVenta) * 100 : 0
-    const markup = costoTotal > 0 ? ((precioTotalVenta - costoTotal) / costoTotal) * 100 : 0
     
     return Response.json({
       success: true,
@@ -59,8 +57,6 @@ export async function POST(request) {
       costo_total: costoTotal,
       precio_total_venta: precioTotalVenta,
       ganancia_estimada: gananciaEstimada,
-      margen_ganancia: margenGanancia,
-      markup: markup,
       detalles: {
         costo_fabricacion_unitario: costoFabricacionUnitario,
         precio_venta_unitario: precioVentaUnitario,

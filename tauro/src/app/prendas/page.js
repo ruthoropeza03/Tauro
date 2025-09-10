@@ -282,6 +282,16 @@ export default function Prendas() {
                 />
               </div>
             </div>
+            <div>
+              <label className="block text-gray-700 mb-2">URL de la imagen</label>
+                <input
+                  type="url"
+                  value={formData.imagen_url || ''}
+                  onChange={(e) => setFormData({...formData, imagen_url: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  />
+            </div>
             
             <button
               type="submit"
@@ -349,7 +359,6 @@ export default function Prendas() {
                 }
               </p>
             </div>
-            
             <button
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded mr-2 hover:bg-green-700"
@@ -438,6 +447,7 @@ export default function Prendas() {
                 <th className="p-3 text-left">Precio Venta</th>
                 <th className="p-3 text-left">Materiales</th>
                 <th className="p-3 text-left">Ganancia</th>
+                <th className="p-3 text-left">Imagen</th>
                 <th className="p-3 text-left">Acciones</th>
               </tr>
             </thead>
@@ -458,6 +468,19 @@ export default function Prendas() {
                     }`}>
                       ${ganancia.toFixed(2)}
                     </td>
+                    <td className="p-3">
+  {prenda.imagen_url ? (
+    <img 
+      src={prenda.imagen_url} 
+      alt={prenda.nombre}
+      className="w-16 h-16 object-cover rounded"
+    />
+  ) : (
+    <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+      <span className="text-gray-500">📷</span>
+    </div>
+  )}
+</td>
                     <td className="p-3">
                       <button
                         onClick={() => handleViewMaterials(prenda)}
