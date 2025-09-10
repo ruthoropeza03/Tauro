@@ -438,8 +438,8 @@ export default function Prendas() {
           </div>
         )}
         
-        <div className=" bg-white rounded shadow-md overflow-hidden">
-          <table className="overflow-x-auto w-full">
+        <div className=" bg-white rounded shadow-md overflow-auto">
+          <table className="w-full">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-3 text-left">Nombre</th>
