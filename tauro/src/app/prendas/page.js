@@ -13,6 +13,14 @@ const getNombreGrupoTallas = (grupo) => {
   return grupos[grupo] || grupo
 }
 
+// Función para obtener grupos de tallas únicos de los materiales de una prenda
+const getGruposTallasFromMaterials = (materials) => {
+  if (!materials || materials.length === 0) return [];
+  
+  const gruposUnicos = [...new Set(materials.map(m => m.grupo_tallas))];
+  return gruposUnicos.map(grupo => getNombreGrupoTallas(grupo)).join(', ');
+}
+
 export default function Prendas() {
   const [prendas, setPrendas] = useState([])
   const [materiales, setMateriales] = useState([])
@@ -21,6 +29,7 @@ export default function Prendas() {
   const [showMaterialsModal, setShowMaterialsModal] = useState(false)
   const [selectedPrenda, setSelectedPrenda] = useState(null)
   const [prendaMaterials, setPrendaMaterials] = useState([])
+  const [prendasWithMaterials, setPrendasWithMaterials] = useState([])
   const [formData, setFormData] = useState({
     nombre: ''
   })
@@ -50,6 +59,28 @@ export default function Prendas() {
       const response = await fetch('/api/prendas')
       const data = await response.json()
       setPrendas(data)
+      
+      // Obtener materiales para cada prenda
+      const prendasConMateriales = await Promise.all(
+        data.map(async (prenda) => {
+          try {
+            const materialesResponse = await fetch(`/api/prendas/${prenda.id}/materiales`)
+            const materialesData = await materialesResponse.json()
+            return {
+              ...prenda,
+              materiales: materialesData
+            }
+          } catch (error) {
+            console.error(`Error fetching materiales for prenda ${prenda.id}:`, error)
+            return {
+              ...prenda,
+              materiales: []
+            }
+          }
+        })
+      )
+      
+      setPrendasWithMaterials(prendasConMateriales)
     } catch (error) {
       console.error('Error fetching prendas:', error)
     }
@@ -142,7 +173,7 @@ export default function Prendas() {
     setMaterialesForm([{ 
       material_id: '', 
       cantidad: '', 
-      grupo_tallas: prenda.grupo_tallas || 'XS-S-M-L-XL' 
+      grupo_tallas: 'XS-S-M-L-XL' 
     }])
     setShowMaterialForm(true)
   }
@@ -248,8 +279,8 @@ export default function Prendas() {
   // Paginación
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  const currentItems = prendas.slice(indexOfFirstItem, indexOfLastItem)
-  const totalPages = Math.ceil(prendas.length / itemsPerPage)
+  const currentItems = prendasWithMaterials.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(prendasWithMaterials.length / itemsPerPage)
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
@@ -492,9 +523,9 @@ export default function Prendas() {
                   <tr key={prenda.id}>
                     <td className="font-medium">{prenda.nombre}</td>
                     <td>
-                      {getNombreGrupoTallas(prenda.grupo_tallas)}
+                      {getGruposTallasFromMaterials(prenda.materiales)}
                     </td>
-                    <td>{prenda.materiales_count || 0} materiales</td>
+                    <td>{prenda.materiales?.length || 0} materiales</td>
                     <td>
                       {prenda.imagen_url ? (
                         <img 
@@ -544,7 +575,7 @@ export default function Prendas() {
         </div>
 
         {/* Paginación */}
-        {prendas.length > itemsPerPage && (
+        {prendasWithMaterials.length > itemsPerPage && (
           <div className="flex justify-center mt-6 space-x-2">
             <button
               onClick={() => paginate(currentPage - 1)}
@@ -579,7 +610,7 @@ export default function Prendas() {
         )}
 
         <div className="mt-4 text-sm text-secondary">
-          Mostrando {currentItems.length} de {prendas.length} prendas
+          Mostrando {currentItems.length} de {prendasWithMaterials.length} prendas
         </div>
       </div>
     </Layout>
