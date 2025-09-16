@@ -21,6 +21,22 @@ const getGruposTallasFromMaterials = (materials) => {
   return gruposUnicos.map(grupo => getNombreGrupoTallas(grupo)).join(', ');
 }
 
+// Función para agrupar materiales por talla
+const groupMaterialsByTalla = (materials) => {
+  if (!materials || materials.length === 0) return {};
+  
+  const grouped = {};
+  materials.forEach(material => {
+    const talla = material.grupo_tallas;
+    if (!grouped[talla]) {
+      grouped[talla] = [];
+    }
+    grouped[talla].push(material);
+  });
+  
+  return grouped;
+}
+
 export default function Prendas() {
   const [prendas, setPrendas] = useState([])
   const [materiales, setMateriales] = useState([])
@@ -439,14 +455,14 @@ export default function Prendas() {
                 type="button"
                 onClick={() => setShowMaterialForm(false)}
                 className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition-colors"
-              >
+                >
                 Cancelar
               </button>
             </div>
           </form>
         )}
 
-        {/* Modal para ver materiales */}
+        {/* Modal para ver materiales - Ahora agrupados por talla */}
         {showMaterialsModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded shadow-md max-w-4xl w-full mx-4 max-h-96 overflow-y-auto">
@@ -458,39 +474,59 @@ export default function Prendas() {
                 <p className="text-gray-500">No hay materiales asignados a esta prenda.</p>
               ) : (
                 <div>
-                  <div className="overflow-x-auto">
-                    <table className="table-custom w-full">
-                      <thead>
-                        <tr>
-                          <th>Material</th>
-                          <th>Cantidad</th>
-                          <th>Precio/m</th>
-                          <th>Grupo de Tallas</th>
-                          <th>Costo Total</th>
-                          <th>Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {prendaMaterials.map((material) => (
-                          <tr key={material.material_prenda_id || material.id}>
-                            <td className="font-medium">{material.nombre}</td>
-                            <td>{material.cantidad} m</td>
-                            <td>${material.precio_por_metro}</td>
-                            <td>{getNombreGrupoTallas(material.grupo_tallas)}</td>
-                            <td>${(material.cantidad * material.precio_por_metro).toFixed(2)}</td>
-                            <td>
-                              <button
-                                onClick={() => handleDeleteMaterial(material.material_prenda_id)}
-                                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
-                              >
-                                Eliminar
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  {Object.entries(groupMaterialsByTalla(prendaMaterials)).map(([talla, materiales]) => (
+                    <div key={talla} className="mb-6 border-b border-gray-200 pb-4 last:border-b-0">
+                      <h3 className="text-lg font-semibold text-primary mb-3 bg-gray-100 p-2 rounded">
+                        Talla: {getNombreGrupoTallas(talla)}
+                      </h3>
+                      <div className="overflow-x-auto">
+                        <table className="table-custom w-full">
+                          <thead>
+                            <tr>
+                              <th>Material</th>
+                              <th>Cantidad</th>
+                              <th>Precio/m</th>
+                              <th>Costo Total</th>
+                              <th>Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {materiales.map((material) => (
+                              <tr key={material.material_prenda_id || material.id}>
+                                <td className="font-medium">{material.nombre}</td>
+                                <td>{material.cantidad} m</td>
+                                <td>${material.precio_por_metro}</td>
+                                <td>${(material.cantidad * material.precio_por_metro).toFixed(2)}</td>
+                                <td>
+                                  <button
+                                    onClick={() => handleDeleteMaterial(material.material_prenda_id)}
+                                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                                  >
+                                    Eliminar
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="bg-gray-50 font-semibold">
+                              <td colSpan="3" className="text-right">Subtotal:</td>
+                              <td>${materiales.reduce((sum, material) => sum + (material.cantidad * material.precio_por_metro), 0).toFixed(2)}</td>
+                              <td></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                {/*   <div className="mt-4 p-3 bg-primary text-accent rounded-lg font-semibold">
+                    <div className="flex justify-between items-center">
+                      <span>Costo total de la prenda:</span>
+                      <span>
+                        ${prendaMaterials.reduce((sum, material) => sum + (material.cantidad * material.precio_por_metro), 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div> */}
                 </div>
               )}
               
