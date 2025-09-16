@@ -22,12 +22,12 @@ export default function Prendas() {
   const [selectedPrenda, setSelectedPrenda] = useState(null)
   const [prendaMaterials, setPrendaMaterials] = useState([])
   const [formData, setFormData] = useState({
-    nombre: '',
-    grupo_tallas: 'XS-S-M-L-XL' // Valor por defecto
+    nombre: ''
   })
   const [materialesForm, setMaterialesForm] = useState([{
     material_id: '',
-    cantidad: ''
+    cantidad: '',
+    grupo_tallas: 'XS-S-M-L-XL' // Valor por defecto
   }])
   const [editingId, setEditingId] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -100,8 +100,7 @@ export default function Prendas() {
         }
         
         setFormData({ 
-          nombre: '', 
-          grupo_tallas: 'XS-S-M-L-XL'
+          nombre: ''
         })
         setEditingId(null)
         setShowForm(false)
@@ -114,8 +113,7 @@ export default function Prendas() {
 
   const handleEdit = (prenda) => {
     setFormData({
-      nombre: prenda.nombre,
-      grupo_tallas: prenda.grupo_tallas || 'XS-S-M-L-XL'
+      nombre: prenda.nombre
     })
     setEditingId(prenda.id)
     setShowForm(true)
@@ -141,12 +139,20 @@ export default function Prendas() {
 
   const handleAddMaterial = (prenda) => {
     setSelectedPrenda(prenda)
-    setMaterialesForm([{ material_id: '', cantidad: '' }])
+    setMaterialesForm([{ 
+      material_id: '', 
+      cantidad: '', 
+      grupo_tallas: prenda.grupo_tallas || 'XS-S-M-L-XL' 
+    }])
     setShowMaterialForm(true)
   }
 
   const addMaterialField = () => {
-    setMaterialesForm([...materialesForm, { material_id: '', cantidad: '' }])
+    setMaterialesForm([...materialesForm, { 
+      material_id: '', 
+      cantidad: '', 
+      grupo_tallas: materialesForm[0].grupo_tallas || 'XS-S-M-L-XL' 
+    }])
   }
 
   const removeMaterialField = (index) => {
@@ -159,6 +165,14 @@ export default function Prendas() {
   const handleMaterialChange = (index, field, value) => {
     const newMaterials = [...materialesForm]
     newMaterials[index][field] = value
+    
+    // Si cambiamos el grupo de tallas en el primer campo, actualizar todos los demás
+    if (field === 'grupo_tallas' && index === 0) {
+      for (let i = 1; i < newMaterials.length; i++) {
+        newMaterials[i].grupo_tallas = value
+      }
+    }
+    
     setMaterialesForm(newMaterials)
   }
 
@@ -183,9 +197,7 @@ export default function Prendas() {
           },
           body: JSON.stringify({
             prenda_id: selectedPrenda.id,
-            ...material,
-            // La talla se toma del grupo de tallas de la prenda
-            grupo_tallas: formData.grupo_tallas || selectedPrenda.grupo_tallas
+            ...material
           }),
         })
       )
@@ -194,7 +206,7 @@ export default function Prendas() {
       const allSuccessful = responses.every(response => response.ok)
 
       if (allSuccessful) {
-        setMaterialesForm([{ material_id: '', cantidad: '' }])
+        setMaterialesForm([{ material_id: '', cantidad: '', grupo_tallas: 'XS-S-M-L-XL' }])
         setShowMaterialForm(false)
         if (editingId) {
           await fetchPrendaMaterials(selectedPrenda.id)
@@ -259,7 +271,7 @@ export default function Prendas() {
               {editingId ? 'Editar Prenda' : 'Nueva Prenda'}
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
               <div>
                 <label className="block text-secondary mb-2 font-medium">Nombre</label>
                 <input
@@ -269,22 +281,6 @@ export default function Prendas() {
                   className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
                   required
                 />
-              </div>
-              
-              <div>
-                <label className="block text-secondary mb-2 font-medium">Grupo de Tallas</label>
-                <select
-                  value={formData.grupo_tallas}
-                  onChange={(e) => setFormData({...formData, grupo_tallas: e.target.value})}
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                >
-                  {gruposTallas.map(grupo => (
-                    <option key={grupo.value} value={grupo.value}>
-                      {grupo.label}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
             
@@ -313,9 +309,26 @@ export default function Prendas() {
             <h2 className="text-xl font-semibold text-secondary mb-4">
               Agregar Materiales a {selectedPrenda.nombre}
             </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Grupo de tallas: {getNombreGrupoTallas(selectedPrenda.grupo_tallas)}
-            </p>
+            
+            {/* Campo de grupo de tallas en el formulario de materiales */}
+            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+              <label className="block text-secondary mb-2 font-medium">Grupo de Tallas</label>
+              <select
+                value={materialesForm[0].grupo_tallas}
+                onChange={(e) => handleMaterialChange(0, 'grupo_tallas', e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                required
+              >
+                {gruposTallas.map(grupo => (
+                  <option key={grupo.value} value={grupo.value}>
+                    {grupo.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-gray-500 mt-2">
+                Este grupo de tallas se aplicará a todos los materiales agregados
+              </p>
+            </div>
             
             {materialesForm.map((material, index) => (
               <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 border border-gray-200 rounded-lg relative">
@@ -421,6 +434,7 @@ export default function Prendas() {
                           <th>Material</th>
                           <th>Cantidad</th>
                           <th>Precio/m</th>
+                          <th>Grupo de Tallas</th>
                           <th>Costo Total</th>
                           <th>Acciones</th>
                         </tr>
@@ -431,6 +445,7 @@ export default function Prendas() {
                             <td className="font-medium">{material.nombre}</td>
                             <td>{material.cantidad} m</td>
                             <td>${material.precio_por_metro}</td>
+                            <td>{getNombreGrupoTallas(material.grupo_tallas)}</td>
                             <td>${(material.cantidad * material.precio_por_metro).toFixed(2)}</td>
                             <td>
                               <button
