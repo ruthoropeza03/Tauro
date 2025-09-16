@@ -3,11 +3,11 @@ import { query } from '@/lib/db'
 
 export async function POST(request) {
   try {
-    const { prenda_id, material_id, cantidad, talla } = await request.json()
+    const { prenda_id, material_id, cantidad, grupo_tallas } = await request.json()
     
     const result = await query(
-      'INSERT INTO materiales_por_prenda (prenda_id, material_id, cantidad, talla) VALUES ($1, $2, $3, $4) RETURNING *',
-      [prenda_id, material_id, parseFloat(cantidad), talla]
+      'INSERT INTO materiales_por_prenda (prenda_id, material_id, cantidad, grupo_tallas) VALUES ($1, $2, $3, $4) RETURNING *',
+      [prenda_id, material_id, parseFloat(cantidad), grupo_tallas]
     )
     
     return Response.json({ 
